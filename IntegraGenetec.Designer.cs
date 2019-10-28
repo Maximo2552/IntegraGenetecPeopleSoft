@@ -33,6 +33,7 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.Erro_lbl = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // progressBar1
@@ -45,7 +46,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(142, 33);
+            this.label1.Location = new System.Drawing.Point(142, 13);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(186, 13);
             this.label1.TabIndex = 2;
@@ -55,11 +56,19 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
             // 
+            // Erro_lbl
+            // 
+            this.Erro_lbl.Location = new System.Drawing.Point(12, 38);
+            this.Erro_lbl.Name = "Erro_lbl";
+            this.Erro_lbl.Size = new System.Drawing.Size(461, 17);
+            this.Erro_lbl.TabIndex = 3;
+            // 
             // IntegraGenetec
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(485, 91);
+            this.Controls.Add(this.Erro_lbl);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.progressBar1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -76,5 +85,6 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Label Erro_lbl;
     }
 }

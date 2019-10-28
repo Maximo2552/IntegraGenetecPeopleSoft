@@ -26,10 +26,10 @@ namespace IntegraGenetecPeopleSoft.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source =172.16.190.108\\SQLEXPRESS; Initial Catalog =Integracao;User ID =imod" +
-            "; Password=imod; Min Pool Size = 5; Max Pool Size = 15; Connection Reset = True;" +
-            " Connection Lifetime = 600; Trusted_Connection = no; MultipleActiveResultSets = " +
-            "True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(description=(address=(protocol=tcp)(host=orahml-scam)(port=1521))(co" +
+            "nnect_data=(service_name=10.4.8.120:1521)));Persist Security Info=True;User ID=G" +
+            "ESEC_USER;Password=pwd_gesec_hml;Unicode=True\" providerName=\"System.Data.OracleC" +
+            "lient\"")]
         public string Conexao {
             get {
                 return ((string)(this["Conexao"]));
@@ -43,6 +43,42 @@ namespace IntegraGenetecPeopleSoft.Properties {
         public string Select {
             get {
                 return ((string)(this["Select"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("y+BiIiYO5VxBax6/HNi7/ZcXWuvlnEemfaMhoQS1RMkfOGvEBWdUV7zQN272yHVG")]
+        public string Certificado {
+            get {
+                return ((string)(this["Certificado"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("172.16.190.108")]
+        public string Diretorio {
+            get {
+                return ((string)(this["Diretorio"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Admin")]
+        public string UsuarioSC {
+            get {
+                return ((string)(this["UsuarioSC"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SenhaSC {
+            get {
+                return ((string)(this["SenhaSC"]));
             }
         }
     }

@@ -14,9 +14,18 @@ namespace IntegraGenetecPeopleSoft
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new IntegraGenetec());
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new IntegraGenetec());
+            }
+            catch (Exception)
+            {
+
+                //throw;
+            }
+            
         }
     }
 }
