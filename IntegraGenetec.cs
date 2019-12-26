@@ -51,24 +51,11 @@ namespace IntegraGenetecPeopleSoft
                 //diretorioSC = "172.16.190.162";
                 //usuarioSC = "admin";
                 //senhaSC = "G&n&t&c2019";
-                ////sdk.ClientCertificate = "KxsD11z743Hf5Gq9mv3+5ekxzemlCiUXkTFY5ba1NOGcLCmGstt2n0zYE9NsNimv";
-                //sdk.ClientCertificate = "y+BiIiYO5VxBax6/HNi7/ZcXWuvlnEemfaMhoQS1RMkfOGvEBWdUV7zQN272yHVG";
+                //sdk.ClientCertificate = "KxsD11z743Hf5Gq9mv3+5ekxzemlCiUXkTFY5ba1NOGcLCmGstt2n0zYE9NsNimv";
+                //sdk.ClientCertificate = "y+BiIiYO5VxBax6/HNi7/ZcXWuvlnEemfaMhoQS1RMkfOGvEBWdUV7zQN272yHVG";                
 
-                //diretorioSC = "127.0.0.1";
-                //usuarioSC = "estrela";
-                //senhaSC = "estrela@2019";
-                //sdk.ClientCertificate = "y+BiIiYO5VxBax6/HNi7/ZcXWuvlnEemfaMhoQS1RMkfOGvEBWdUV7zQN272yHVG";
 
-                //DialogResult confirm = MessageBox.Show("Inicio", "Salvar Arquivo", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-                //if (confirm.ToString().ToUpper() == "YES")
-                //{
-
-                //}
-                //else
-                //{
-                //
-                //}
-                //sdk.ClientCertificate = certificado;
+                sdk.ClientCertificate = certificado;
                 try
                 {
                     sdk.LogOn(diretorioSC, usuarioSC, senhaSC);
@@ -85,26 +72,13 @@ namespace IntegraGenetecPeopleSoft
                     AppendLog("Logado no SC...");
                     InitializeComponent();
                     Refresh();
-                    //DialogResult confirm = MessageBox.Show("Inicio Integração Oracle", "Integração", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-                    //if (confirm.ToString().ToUpper() == "YES")
-                    //{
-                    
-                    ExportarGenetc();
-                    
-                    //}
-                    //else
-                    //{
-
-                    //ExportacaoGenetecSQL();
-
-                    //}
-                    //timer1.Enabled = true;
+                  
+                    ExportacaoGenetecSQL();                  
                 }
                 else
                 {
                     Cursor.Current = Cursors.Default;
-                    AppendLog("Não foi possível Logar no SC...");
-                    //Close();
+                    AppendLog("Não foi possível Logar no SC...");                    
                 }
                 
 
@@ -112,56 +86,45 @@ namespace IntegraGenetecPeopleSoft
             catch (Exception ex)
             {
                 Cursor.Current = Cursors.Default;
-                AppendLog(ex.Message);
-                //Close();
+                AppendLog(ex.Message);                
             }
 
         }
 
         private void ExportarGenetc()
         {
-            AppendLog("Inicio de ExportarGenetc...");
+            int numero_inserido = 0;
+            int numero_alterado = 0;
+            AppendLog("Inicio da Integração com o Genetc!");
             try
             {
+                
                 Cursor.Current = Cursors.WaitCursor;
                 IniciarLog();
-                //progressBar1.Minimum = 1;
 
                 grupos = RetornarGrupos();
-                //var colaboradoresGenetec = new List<Cardholder>();//  RetornarColaboradoresGenetec();
                 var colaboradoresGenetec = RetornarColaboradoresGenetec();
-                /////////////////////////////////////////////////////////////////////
-                string gurposEspeciais = ConfigurationManager.AppSettings["Grupos"];
-                var gruposPermanentes = gurposEspeciais.Split(',').ToList<string>();
-                //Opcional: esse metodo cria os gruposespeciais caso nao exista no SC
-                //var gruposPermanentes = CriarGruposEspeciais(ConfigurationManager.AppSettings["Grupos"]);
+
 
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 string connectionString = config.ConnectionStrings.ConnectionStrings["Conexao"].ToString();
                 
-                //AppendLog(connectionString);
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
 
                     string queryString = ConfigurationManager.AppSettings["Select"];
 
                     OracleCommand command = new OracleCommand(queryString, connection);
-                    //AppendLog(queryString);
                     connection.Open();
-                    //MessageBox.Show("Banco aberto");
-                    //sdk.TransactionManager.CreateTransaction();
                     DataTable dt = new DataTable();
 
                     dt.Load(command.ExecuteReader());
-                   // progressBar1.Maximum = dt.Rows.Count;
-                    //int numero = 1;
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             try
                             {
-                                //aqui incluo o método necessário para continuar o trabalho 
                                 sdk.TransactionManager.CreateTransaction();
 
                                 if (!string.IsNullOrEmpty(reader[5].ToString()) && !string.IsNullOrEmpty(reader[3].ToString()) && !string.IsNullOrEmpty(reader[4].ToString()))
@@ -172,11 +135,8 @@ namespace IntegraGenetecPeopleSoft
                                     string matricula = reader[3].ToString();
                                     
                                     Cardholder cardHolder = colaboradoresGenetec.Where(c => c.CustomFields["Matricula"].ToString() == matricula).FirstOrDefault();
-                                    //AppendLog("Teve alteração.: " + matricula + " " + TeveAlteracao(cardHolder, reader));
                                     if (cardHolder == null || TeveAlteracao(cardHolder, reader))
                                     {
-                                        
-                                        AppendLog("CardHolder: " + nome + "" + sobrenome + " Teve alteração.: " + TeveAlteracao(cardHolder, reader));
                                         if (status == Status.ATIVO.ToString() || status == Status.ATIVO_AUSENTE.ToString() || status == Status.INATIVO.ToString())
                                         {
                                             string nomeGrupo = reader[4].ToString();
@@ -196,47 +156,61 @@ namespace IntegraGenetecPeopleSoft
                                                 cardHolder.LastName = sobrenome;
                                                 cardHolder.SetCustomFieldAsync("Matricula", matricula);
                                                 cardHolder.Groups.Add(gurpoNovo.Guid);
-
+                                                numero_inserido += 1;
                                             }
                                             else
                                             {
+                                                numero_inserido += 1;
                                                 if (cardHolder.Groups.Count > 0)
                                                 {
+                                                    var old_Group = "";
                                                     var cardholdergrupo = new List<Guid>();
                                                     cardholdergrupo.AddRange(cardHolder.Groups.ToList<Guid>());
 
                                                     foreach (Guid guid in cardholdergrupo)
                                                     {
                                                         var cardHolderGroup = sdk.GetEntity(guid) as CardholderGroup;
-                                                        //if (!gruposPermanentes.Contains(cardHolderGroup.Guid.ToString()))
-                                                        //{
-                                                        //    cardHolder.Groups.Remove(cardHolderGroup.Guid);
-                                                        //}
                                                         if (!(Boolean)cardHolderGroup.CustomFields["Especial"])
                                                         {
                                                             cardHolder.Groups.Remove(cardHolderGroup.Guid);
                                                         }
                                                     }
-                                                    AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Status: " + status);
+                                                    string newSatus = "";
+                                                    if (status.ToUpper() == "INATIVO" || status.ToUpper() == "ATIVO_AUSENTE")
+                                                    {
+                                                        newSatus = "Inactive";
+                                                    }
+                                                    else
+                                                    {
+                                                        newSatus = "Active";
+                                                    }
+                                                    if (old_Group != gurpoNovo.Name)
+                                                    {
+                                                        if (cardHolder.State.ToString() == newSatus)
+                                                        {
+                                                            AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Grupo Anterior:" + old_Group + " Para Novo Grupo: " + gurpoNovo.Name);
+                                                        }
+                                                        else
+                                                        {
+                                                            AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Grupo Anterior:" + old_Group + " Para Novo Grupo: " + gurpoNovo.Name + " Status: " + status);
+                                                        }
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (cardHolder.State.ToString() == newSatus)
+                                                        {
+                                                            AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Status: " + status);
+                                                        }
+                                                    }
                                                 }
                                                 cardHolder.Groups.Add(gurpoNovo.Guid);
                                             }
                                             cardHolder.State = ObterStatus(status);
                                         }
-                                        //else if (status == Status.INATIVO.ToString())
-                                        //{
-                                        //    if (cardHolder != null)
-                                        //    {
-                                        //        sdk.DeleteEntity(cardHolder.Guid);
-                                        //        AppendLog("Excluido CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Status: " + status);
-
-                                        //    }
-                                        //}
-                                        
                                     }
 
                                 }
-                                //progressBar1.Value += 1;
                                 sdk.TransactionManager.CommitTransaction();
                             }
                             catch (Exception ex)
@@ -251,8 +225,9 @@ namespace IntegraGenetecPeopleSoft
                     }
                 }
                 Cursor.Current = Cursors.Default;
+                AppendLog("__________________________________________________________________");
                 AppendLog("Fim de Integração..." + inicio + " Fim: " + DateTime.Now.ToString());
-                AppendLog("Toral de Registros: " + progressBar1.Value);
+                AppendLog("Toral de Registros Inseridos( " + numero_inserido + ") Alerados ( " + numero_alterado + " )");
 
                 Close();
             }
@@ -271,26 +246,27 @@ namespace IntegraGenetecPeopleSoft
         }
         private void ExportacaoGenetecSQL()
         {
-            AppendLog("Inicio de ExportarGenetc...");
+            int numero_inserido = 0;
+            int numero_alterado = 0;
+            AppendLog("Inicio da Integração com o Genetc!");
             try
             {
                 Cursor.Current = Cursors.WaitCursor;
                 IniciarLog();
                 progressBar1.Minimum = 1;
 
-                grupos = RetornarGrupos();
-                //var colaboradoresGenetec = new List<Cardholder>();//  RetornarColaboradoresGenetec();
+                grupos = RetornarGrupos();                
                 var colaboradoresGenetec = RetornarColaboradoresGenetec();
-                /////////////////////////////////////////////////////////////////////
+                
                 string gurposEspeciais = ConfigurationManager.AppSettings["Grupos"];
                 var gruposPermanentes = gurposEspeciais.Split(',').ToList<string>();
-                //Opcional: esse metodo cria os gruposespeciais caso nao exista no SC
-                //var gruposPermanentes = CriarGruposEspeciais(ConfigurationManager.AppSettings["Grupos"]);
 
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 string connectionString = config.ConnectionStrings.ConnectionStrings["Conexao"].ToString();
-                connectionString = "Data Source=GCTEC04;Initial Catalog=Integracao;User ID=imod;Password=imod;Min Pool Size=5;Max Pool Size=15;Connection Reset=True;Connection Lifetime=600;Trusted_Connection=no;MultipleActiveResultSets=True";
+                
+                //connectionString = "Data Source=GCTEC04;Initial Catalog=Integracao;User ID=imod;Password=imod;Min Pool Size=5;Max Pool Size=15;Connection Reset=True;Connection Lifetime=600;Trusted_Connection=no;MultipleActiveResultSets=True";
                 //AppendLog(connectionString);
+
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
 
@@ -305,7 +281,7 @@ namespace IntegraGenetecPeopleSoft
 
                     dt.Load(command.ExecuteReader());
                     progressBar1.Maximum = dt.Rows.Count;
-                    //int numero = 1;
+                    
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -323,11 +299,11 @@ namespace IntegraGenetecPeopleSoft
                                     string matricula = reader[3].ToString();
                                     
                                     Cardholder cardHolder = colaboradoresGenetec.Where(c => c.CustomFields["Matricula"].ToString() == matricula).FirstOrDefault();
-                                    //AppendLog("Teve alteração.: " + TeveAlteracaoSQL(cardHolder, reader));
+
+                                   
                                     if (cardHolder == null || TeveAlteracaoSQL(cardHolder, reader))
                                     {
-
-                                        AppendLog("CardHolder: " + nome + "" + sobrenome + " Teve alteração.: " + TeveAlteracaoSQL(cardHolder, reader));
+                                        
                                         if (status == Status.ATIVO.ToString() || status == Status.ATIVO_AUSENTE.ToString() || status == Status.INATIVO.ToString())
                                         {
                                             string nomeGrupo = reader[4].ToString();
@@ -347,47 +323,65 @@ namespace IntegraGenetecPeopleSoft
                                                 cardHolder.LastName = sobrenome;
                                                 cardHolder.SetCustomFieldAsync("Matricula", matricula);
                                                 cardHolder.Groups.Add(gurpoNovo.Guid);
-
+                                                numero_inserido += 1;
                                             }
                                             else
                                             {
+                                                numero_alterado += 1;
                                                 if (cardHolder.Groups.Count > 0)
                                                 {
+                                                    var old_Group = "";
                                                     var cardholdergrupo = new List<Guid>();
                                                     cardholdergrupo.AddRange(cardHolder.Groups.ToList<Guid>());
 
                                                     foreach (Guid guid in cardholdergrupo)
                                                     {
                                                         var cardHolderGroup = sdk.GetEntity(guid) as CardholderGroup;
-                                                        //if (!gruposPermanentes.Contains(cardHolderGroup.Guid.ToString()))
-                                                        //{
-                                                        //    cardHolder.Groups.Remove(cardHolderGroup.Guid);
-                                                        //}
+                                                        old_Group = cardHolderGroup.Name;
                                                         if (!(Boolean)cardHolderGroup.CustomFields["Especial"])
                                                         {
                                                             cardHolder.Groups.Remove(cardHolderGroup.Guid);
                                                         }
                                                     }
-                                                    AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Status: " + status);
+                                                    string newSatus = "";
+                                                    if (status.ToUpper() == "INATIVO" || status.ToUpper() == "ATIVO_AUSENTE")
+                                                    {
+                                                        newSatus = "Inactive";
+                                                    }
+                                                    else 
+                                                    {
+                                                        newSatus = "Active";
+                                                    }
+                                                    if(old_Group != gurpoNovo.Name)
+                                                    {
+                                                        if(cardHolder.State.ToString() == newSatus)
+                                                        {
+                                                            AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Grupo Anterior:" + old_Group + " Para Novo Grupo: " + gurpoNovo.Name);
+                                                        }
+                                                        else
+                                                        {
+                                                            AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Grupo Anterior:" + old_Group + " Para Novo Grupo: " + gurpoNovo.Name + " Status: " + status);
+                                                        }
+                                                        
+                                                    }
+                                                    else
+                                                    {
+                                                        if (cardHolder.State.ToString() == newSatus)
+                                                        {
+                                                            AppendLog("Alterado CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Status: " + status);
+                                                        }
+                                                    }
                                                 }
                                                 cardHolder.Groups.Add(gurpoNovo.Guid);
                                             }
                                             cardHolder.State = ObterStatus(status);
+                                            
                                         }
-                                        //else if (status == Status.INATIVO.ToString())
-                                        //{
-                                        //    if (cardHolder != null)
-                                        //    {
-                                        //        sdk.DeleteEntity(cardHolder.Guid);
-                                        //        AppendLog("Excluido CardHolder: " + nome + " " + sobrenome + " Matricula: " + matricula + " Status: " + status);
-
-                                        //    }
-                                        //}
-
+                                        
                                     }
 
                                 }
-                                progressBar1.Value += 1;
+                                
                                 sdk.TransactionManager.CommitTransaction();
                             }
                             catch (Exception ex)
@@ -402,8 +396,9 @@ namespace IntegraGenetecPeopleSoft
                     }
                 }
                 Cursor.Current = Cursors.Default;
+                AppendLog("__________________________________________________________________");
                 AppendLog("Fim de Integração..." + inicio + " Fim: " + DateTime.Now.ToString());
-                AppendLog("Toral de Registros: " + progressBar1.Value);
+                AppendLog("Toral de Registros Inseridos( " + numero_inserido + ") Alerados ( " + numero_alterado + " )");
 
                 Close();
             }
